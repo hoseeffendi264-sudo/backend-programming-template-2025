@@ -5,19 +5,35 @@ const mongoose = require('mongoose');
 const config = require('../core/config');
 const logger = require('../core/logger')('app');
 
-// Join the database connection string
-const connectionString = new URL(config.database.connection);
-connectionString.pathname += config.database.name;
+let mongoUri;
+const baseConnection = config.database.connection;
+const dbName = config.database.name;
 
-mongoose.connect(`${connectionString.toString()}`);
+if (dbName) {
+  const url = new URL(baseConnection);
+
+  const cleanDbName = dbName.startsWith('/') ? dbName : `/${dbName}`;
+
+  url.pathname = cleanDbName;
+
+  mongoUri = url.toString();
+} else {
+  mongoUri = baseConnection;
+}
+
+mongoose.connect(mongoUri);
 
 const db = mongoose.connection;
+
+db.on('error', (err) => {
+  logger.error('MongoDB connection error:', err);
+});
+
 db.once('open', () => {
   logger.info('Successfully connected to MongoDB');
 });
 
-const dbExports = {};
-dbExports.db = db;
+const dbExports = { db };
 
 const basename = path.basename(__filename);
 
@@ -27,7 +43,6 @@ fs.readdirSync(__dirname)
       file.indexOf('.') !== 0 && file !== basename && file.slice(-3) === '.js'
   )
   .forEach((file) => {
-    // eslint-disable-next-line import/no-dynamic-require, global-require
     const model = require(path.join(__dirname, file))(mongoose);
     dbExports[model.modelName] = model;
   });

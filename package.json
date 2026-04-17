@@ -4,6 +4,7 @@
   "description": "",
   "main": "src/index.js",
   "scripts": {
+    "start": "node src/core/server.js",
     "dev": "nodemon ./src/index.js",
     "test": "echo \"Error: no test specified\" && exit 1",
     "eslint": "eslint src/**"
@@ -18,7 +19,9 @@
     "express": "^4.21.2",
     "express-async-errors": "^3.1.1",
     "method-override": "^3.0.0",
-    "mongoose": "^8.12.2",
+    "moment": "^2.30.1",
+    "mongodb": "^7.1.1",
+    "mongoose": "^8.23.0",
     "pino": "^9.6.0",
     "pino-http": "^10.4.0"
   },
